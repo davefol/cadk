@@ -5,3 +5,15 @@ version = 4
 [[package]]
 name = "cadk"
 version = "0.1.0"
+
+[[package]]
+name = "cadk-ap203-schema"
+version = "0.1.0"
+
+[[package]]
+name = "cadk-express"
+version = "0.1.0"
+
+[[package]]
+name = "cadk-step"
+version = "0.1.0"

@@ -1,13 +1,3 @@
-[package]
-name = "cadk"
-version = "0.1.0"
-edition = "2024"
-license      = "MIT"
-description  = "CAD kernel in pure Rust (B-Rep, CSG, tessellation)"
-readme       = "README.md"
-repository   = "https://github.com/davefol/cadk"
-keywords     = ["cad", "kernel", "geometry", "brep"]
-categories   = ["graphics", "science"]
-documentation = "https://docs.rs/cadk"
-
-[dependencies]
+[workspace]
+resolver = "3"
+members = ["cadk", "cadk-ap203-schema", "cadk-express", "cadk-step", ]
