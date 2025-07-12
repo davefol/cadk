@@ -1,12 +1,13 @@
 [package]
-name = "cadk-express"
+name = "cadk-bnf"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+anyhow = "1.0.98"
 lalrpop-util = "0.22.2"
 logos = "0.15.0"
 thiserror = "2.0.12"
 
 [build-dependencies]
-lalrpop = "0.22.2"
+lalrpop = { version = "0.22.2", default-false = false }

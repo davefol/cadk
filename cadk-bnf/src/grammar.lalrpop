@@ -1,0 +1,106 @@
+use crate::lexer::{Token, LexicalError};
+use crate::ast;
+
+grammar;
+
+pub Grammar: ast::Grammar = {
+    <p:Production*> => ast::Grammar { productions: p }
+};
+
+Production: ast::Production = {
+    <num:"ln"?> <lhs:Ident> "=" <rhs:Expr> "." => {
+        ast::Production {
+            index: num,
+            lhs,
+            rhs
+        }
+    }
+};
+
+Expr: ast::Expr = {
+    Choice,
+}
+
+Choice: ast::Expr = {
+    // ────── at least one "|" ──────
+    <first:Sequence> <rest: ("|" <Sequence>)+> => {
+        let mut v = Vec::with_capacity(1 + rest.len());
+        v.push(first);
+        v.extend(rest);
+        ast::Expr::Choice(v)
+    },
+
+    // ────── single sequence, no "|" ──────
+    <s:Sequence> => s,
+};
+
+
+Sequence: ast::Expr = {
+    // keeps AST nice and flat
+    <items:Term+> => match items.len() {
+        1 => items.into_iter().next().unwrap(),
+        _ => ast::Expr::Sequence(items),
+    }
+}
+
+Term: ast::Expr = {
+    "[" <c:Choice> "]" => {
+        ast::Expr::Optional(Box::new(c))
+    },
+    "{" <c:Choice> "}" => {
+        ast::Expr::Repeat(Box::new(c))
+    },
+    "(" <c:Choice> ")" => {
+        ast::Expr::Group(Box::new(c))
+    },
+    <a:Atom> => {
+        ast::Expr::Atom(a)
+    }
+}
+
+Atom: ast::Atom = {
+    <s:"str"> => {
+        ast::Atom::Terminal(s.into())
+    },
+    <e:"escape"> => {
+        ast::Atom::Terminal(e.into())
+    },
+    <id:Ident> => {
+        ast::Atom::NonTerminal(id)
+    }
+}
+
+Ident: ast::Ident = {
+    <id:"ident"> => {
+        ast::Ident(id.into())
+    }
+}
+
+// Sequence: Vec<ast::Expr> = {
+//     <v:"str"+> => {
+//         v
+//     }
+// }
+
+
+
+extern {
+    type Location = usize;
+    type Error = LexicalError;
+
+    enum Token {
+        "=" => Token::Equal,
+        "." => Token::Period,
+        "|" => Token::Pipe,
+        "{" => Token::LeftBrace,
+        "}" => Token::RightBrace,
+        "[" => Token::LeftBracket,
+        "]" => Token::RightBracket,
+        "(" => Token::LeftParen,
+        ")" => Token::RightParen,
+        "ln" => Token::LineNumber(<u32>),
+        "str" => Token::String(<String>),
+        "ident" => Token::Identifier(<String>),
+        "escape" => Token::EscapeSequence(<String>),
+    }
+}
